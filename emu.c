@@ -12,7 +12,8 @@ void emu_init(struct emuctx *ctx)
     ctx->ss.w = 0x0 ;
     ctx->es.w = 0x0 ;
     ctx->sp.w = 0xFFF ;
-    ctx->flags.w = 0 ; 
+    ctx->flags.w = 0 ;
+    ctx->is_seg_ovr = 0 ; 
 }
 
 void emu_reset()
