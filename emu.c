@@ -69,6 +69,12 @@ void word_cf_sub(struct emuctx *ctx, word val1, word val2)
     else set_cf(ctx, YES) ; 
 }
 
+void word_af_adc(struct emuctx *ctx, word left_reg, word right_reg)
+{
+    if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
+    else set_af(ctx, NO) ;
+}
+
 void word_af_sub(struct emuctx *ctx, word val1, word val2)
 {
     word two_comp ;
@@ -123,6 +129,7 @@ void sbb_cf_byte(struct emuctx *ctx, byte val1, byte val2)
     }
 }
 
+
 void sbb_cf_word(struct emuctx *ctx, word val1, word val2)
 {
     word two_comp ;
@@ -137,6 +144,62 @@ void sbb_cf_word(struct emuctx *ctx, word val1, word val2)
         if ((val1.w + two_comp.w) & 0x10000) set_cf(ctx, NO) ;
         else set_cf(ctx, YES) ; 
     }
+}
+
+void sbb_of_word(struct emuctx *ctx, word val1, word val2)
+{
+    word two_comp ;
+    two_comp.w = (~val2.w) + 1 ;
+    if (get_cf(ctx) == YES)
+    {
+        word result ;
+        result.w = val1.w + two_comp.w + 0xFFFF ;
+        two_comp.w = two_comp.w + 0xFFFF ;
+        if (!signed_word(val1) && !signed_word(two_comp) && signed_word(result)) set_of(ctx, YES) ;
+        else if (signed_word(val1) && signed_word(two_comp) && !signed_word(result)) set_of(ctx,YES) ;
+        else set_of(ctx, NO) ;
+    }
+    else
+    {
+        word result;
+        result.w = val1.w + two_comp.w ;
+        if (!signed_word(val1) && !signed_word(two_comp) && signed_word(result)) set_of(ctx, YES) ;
+        else if (signed_word(val1) && signed_word(two_comp) && !signed_word(result)) set_of(ctx,YES) ;
+        else set_of(ctx, NO) ;
+    }
+}
+
+void sbb_of_byte(struct emuctx *ctx, byte val1, byte val2)
+{
+    byte two_comp = (~val2)+1 ;
+    if (get_cf(ctx))
+    {
+        byte result = val1 + two_comp + 0xFF ;
+        two_comp = two_comp + 0xFF ;
+        if (!signed_byte(val1) && !signed_byte(two_comp) && signed_byte(result)) set_of(ctx, YES) ;
+        else if (signed_byte(val1) && signed_byte(two_comp) && !signed_byte(result)) set_of(ctx, YES) ;
+        else set_of(ctx, NO) ;
+                 
+    }
+    else
+    {
+        byte result = val1 + two_comp + 0xFF ;
+        if (!signed_byte(val1) && !signed_byte(two_comp) && signed_byte(result)) set_of(ctx, YES) ;
+        else if (signed_byte(val1) && signed_byte(two_comp) && !signed_byte(result)) set_of(ctx, YES) ;
+        else set_of(ctx, NO) ;
+    }
+}
+
+bool signed_byte(byte b)
+{
+    if (b & 0x80) return YES ;
+    else return NO ;
+}
+
+bool signed_word(word w)
+{
+    if (w.w & 0x8000) return YES ;
+    else return NO ;
 }
 
 bool is_reg(struct emuctx *ctx)
@@ -598,7 +661,7 @@ void set_of_word(struct emuctx *ctx, word v1, word v2, word result)
 {
     if ((v1.w & 0x8000) && (v2.w & 0x8000) && !(result.w & 0x8000)) set_of(ctx, YES) ;
     else if  (!(v1.w & 0x8000) && !(v2.w & 0x8000) && (result.w & 0x8000)) set_of(ctx, YES) ;
-    set_of(ctx, NO) ;
+    else set_of(ctx, NO) ;
 }
 
 void inc_flags(struct emuctx *ctx, word value)

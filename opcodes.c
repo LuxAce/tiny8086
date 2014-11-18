@@ -391,8 +391,7 @@ void emu_step(struct emuctx *ctx)
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
-                if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
-                else set_af(ctx, NO) ;
+                word_af_adc(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -409,8 +408,7 @@ void emu_step(struct emuctx *ctx)
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
-                if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
-                else set_af(ctx, NO) ;
+                word_af_adc(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -465,8 +463,7 @@ void emu_step(struct emuctx *ctx)
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
-                if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
-                else set_af(ctx, NO) ;
+                word_af_adc(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -483,8 +480,7 @@ void emu_step(struct emuctx *ctx)
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
-                if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
-                else set_af(ctx, NO) ;
+                word_af_adc(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -517,8 +513,7 @@ void emu_step(struct emuctx *ctx)
             word second_op ;
             second_op.w = right_reg.w + get_cf(ctx) ;
             set_of_word(ctx, left_reg, second_op, result) ;
-            if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
-            else set_af(ctx, NO) ;
+            word_af_adc(ctx, left_reg, right_reg) ;
             is_parity_word(ctx, result) ;
             is_zero_word(ctx, result) ;
             is_sign_word(ctx, result) ;
@@ -541,9 +536,8 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte result = left_reg - (right_reg + get_cf(ctx)) ;
                 set_reg8(ctx, addr, result) ;
-                byte second_op = right_reg + get_cf(ctx) ;
+                sbb_of_byte(ctx, left_reg, right_reg) ;
                 sbb_cf_byte(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, second_op, result)  ;
                 sbb_af_byte(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -556,9 +550,8 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte result = left_reg - (right_reg + get_cf(ctx)) ;
                 write_mem_byte(ctx, addr, result) ;
-                byte second_op = right_reg + get_cf(ctx) ;
+                sbb_of_byte(ctx, left_reg, right_reg) ;
                 sbb_cf_byte(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, second_op, result)  ;
                 sbb_af_byte(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -576,10 +569,8 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - (right_reg.w + get_cf(ctx)) ;
                 set_reg16(ctx, addr, result) ;
+                sbb_of_word(ctx, left_reg, right_reg) ;
                 sbb_cf_word(ctx, left_reg, right_reg) ;
-                word second_op ;
-                second_op.w = right_reg.w + get_cf(ctx) ;
-                set_of_word(ctx, left_reg, second_op, result) ;
                 sbb_af_word(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -593,10 +584,8 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - (right_reg.w + get_cf(ctx));
                 write_mem_word(ctx, addr, result) ;
+                sbb_of_word(ctx, left_reg, right_reg) ;
                 sbb_cf_word(ctx, left_reg, right_reg) ;
-                word second_op ;
-                second_op.w = right_reg.w + get_cf(ctx) ;
-                set_of_word(ctx, left_reg, second_op, result) ;
                 sbb_af_word(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -613,8 +602,8 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, addr) ;
                 byte result = left_reg - (right_reg + get_cf(ctx));
                 set_reg8(ctx, addr, result) ;
+                sbb_of_byte(ctx, left_reg, right_reg) ;
                 sbb_cf_byte(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                 sbb_af_byte(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -627,7 +616,7 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = read_mem_byte(ctx, addr) ;
                 byte result = left_reg - (right_reg + get_cf(ctx));
                 set_reg8(ctx, get_regRM(ctx), result) ;
-                set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
+                sbb_of_byte(ctx, left_reg, right_reg) ;
                 sbb_cf_byte(ctx, left_reg, right_reg) ;
                 sbb_af_byte(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
@@ -646,10 +635,8 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - (right_reg.w + get_cf(ctx)) ;
                 set_reg16(ctx, addr, result) ;
+                sbb_of_word(ctx, left_reg, right_reg) ;
                 sbb_cf_word(ctx, left_reg, right_reg) ;
-                word second_op ;
-                second_op.w = right_reg.w - get_cf(ctx) ;
-                set_of_word(ctx, left_reg, second_op, result) ;
                 sbb_af_word(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -663,10 +650,8 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - (right_reg.w + get_cf(ctx)) ;
                 set_reg16(ctx, get_regRM(ctx), result) ;
+                sbb_of_word(ctx, left_reg, right_reg) ;
                 sbb_cf_word(ctx, left_reg, right_reg) ;
-                word second_op ;
-                second_op.w = right_reg.w + get_cf(ctx) ;
-                set_of_word(ctx, left_reg, second_op, result) ;
                 sbb_af_word(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -680,8 +665,7 @@ void emu_step(struct emuctx *ctx)
             byte right_reg = next_byte(ctx) ;
             byte result = left_reg - (right_reg + get_cf(ctx)) ;
             set_reg8(ctx, AL, result) ;
-            byte second_op = right_reg + get_cf(ctx) ;
-            set_of_byte(ctx, left_reg, second_op, result)  ;
+            sbb_of_byte(ctx, left_reg, right_reg) ;
             sbb_cf_byte(ctx, left_reg, right_reg) ;
             sbb_af_byte(ctx, left_reg, right_reg) ; 
             is_parity_byte(ctx, result) ;
@@ -696,10 +680,8 @@ void emu_step(struct emuctx *ctx)
             word result ;
             result.w = left_reg.w - (right_reg.w + get_cf(ctx)) ;
             set_reg16(ctx, AX, result) ;
+            sbb_of_word(ctx, left_reg, right_reg) ;
             sbb_cf_word(ctx, left_reg, right_reg) ;
-            word second_op ;
-            second_op.w = right_reg.w + get_cf(ctx) ;
-            set_of_word(ctx, left_reg, second_op, result) ;
             sbb_af_word(ctx, left_reg, right_reg) ;
             is_parity_word(ctx, result) ;
             is_zero_word(ctx, result) ;
@@ -1890,9 +1872,8 @@ void emu_step(struct emuctx *ctx)
                         byte right_reg = next_byte(ctx) ;
                         byte result = left_reg - (right_reg + get_cf(ctx)) ;
                         set_reg8(ctx, addr, result) ;
-                        byte second_op = right_reg + get_cf(ctx) ;
+                        sbb_of_byte(ctx, left_reg, right_reg) ;
                         sbb_cf_byte(ctx, left_reg, right_reg) ;
-                        set_of_byte(ctx, left_reg, second_op, result)  ;
                         sbb_af_byte(ctx, left_reg, right_reg) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
@@ -1905,9 +1886,8 @@ void emu_step(struct emuctx *ctx)
                         byte right_reg = next_byte(ctx) ;
                         byte result = left_reg - (right_reg + get_cf(ctx)) ;
                         write_mem_byte(ctx, addr, result) ;
-                        byte second_op = right_reg + get_cf(ctx) ;
+                        sbb_of_byte(ctx, left_reg, right_reg) ;
                         sbb_cf_byte(ctx, left_reg, right_reg) ;
-                        set_of_byte(ctx, left_reg, second_op, result)  ;
                         sbb_af_byte(ctx, left_reg, right_reg) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
@@ -2033,6 +2013,159 @@ void emu_step(struct emuctx *ctx)
                         is_sign_byte(ctx, result) ;
                         set_cycles(ctx, 10) ;
                     }
+                } break ;
+            }
+        } break ;
+        case 0x81:
+        {
+            byte op = ((read_byte(ctx) & 0x38) >> 3) ;
+            switch (op)
+            {
+                case 0x00:
+                { // add reg16/mem16,immed16
+                    debug("add reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w + right_reg.w ;
+                        set_reg16(ctx, addr, result) ;
+                        set_cf_word(ctx, left_reg.w + right_reg.w) ;
+                        if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F)) & 0x10) set_af(ctx, YES) ;
+                        else set_af(ctx, NO) ;
+                        set_of_word(ctx, right_reg, left_reg, result) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w + right_reg.w ;
+                        write_mem_word(ctx, addr, result) ;
+                        set_cf_word(ctx, left_reg.w + right_reg.w) ;
+                        if (((left_reg.w & 0x0F) + (right_reg.w & 0x0F)) & 0x10) set_af(ctx, YES) ;
+                        else set_af(ctx, NO) ;
+                        set_of_word(ctx, right_reg, left_reg, result) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+                } break ;
+                case 0x01:
+                { // or reg16/mem16,immed16
+                    debug("or reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w | right_reg.w ;
+                        set_reg16(ctx, addr, result) ;
+                        set_cf(ctx, NO) ;
+                        set_of(ctx, NO) ;
+                        is_parity_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w | right_reg.w ;
+                        write_mem_word(ctx, addr, result) ;
+                        set_cf(ctx, NO) ;
+                        set_of(ctx, NO) ;
+                        is_parity_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+                } break ;
+                case 0x02:
+                { // adc reg16/mem16,immed16
+                    debug("adc reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
+                        set_reg16(ctx, addr, result) ;
+                        set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
+                        word second_op ;
+                        second_op.w = right_reg.w + get_cf(ctx) ;
+                        set_of_word(ctx, left_reg, second_op, result) ;
+                        word_af_adc(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
+                        write_mem_word(ctx, addr, result) ;
+                        set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
+                        word second_op ;
+                        second_op.w = right_reg.w + get_cf(ctx) ;
+                        set_of_word(ctx, left_reg, second_op, result) ;
+                        word_af_adc(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+
+                } break ;
+                case 0x03:
+                { // sbb reg16/mem16,immed16
+                    debug("sbb reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w - (right_reg.w + get_cf(ctx)) ;
+                        set_reg16(ctx, addr, result) ;
+                        sbb_of_word(ctx, left_reg, right_reg) ;
+                        sbb_cf_word(ctx, left_reg, right_reg) ;
+                        sbb_af_word(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w - (right_reg.w + get_cf(ctx));
+                        write_mem_word(ctx, addr, result) ;
+                        sbb_of_word(ctx, left_reg, right_reg) ;
+                        sbb_cf_word(ctx, left_reg, right_reg) ;
+                        sbb_af_word(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+
                 } break ;
             }
         } break ;

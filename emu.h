@@ -93,6 +93,9 @@ void debug(char *s) ;
 
 void set_cycles(struct emuctx *ctx, int value) ;
 bool is_reg(struct emuctx *ctx) ;
+bool signed_word(word w) ;
+bool signed_byte(byte b) ; 
+void word_af_adc(struct emuctx *ctx, word left_reg, word right_reg) ; 
 void byte_af_sub(struct emuctx *ctx, byte val1, byte val2) ;
 void word_af_sub(struct emuctx *ctx, word val1, word val2) ;
 void word_cf_sub(struct emuctx *ctx, word val1, word val2) ;
@@ -101,10 +104,12 @@ void byte_cf_sub(struct emuctx *ctx, byte val1, byte val2) ;
 void inc_flags(struct emuctx *ctx, word value) ; 
 void dec_flags(struct emuctx *ctx, word value) ;
 
+void sbb_of_word(struct emuctx *ctx, word val1, word val2) ;
 void sbb_af_word(struct emuctx *ctx, word val1, word val2) ;
 void sbb_cf_word(struct emuctx *ctx, word val1, word val2) ; 
 void sbb_af_byte(struct emuctx *ctx, byte val1, byte val2) ;
 void sbb_cf_byte(struct emuctx *ctx, byte val1, byte val2) ;
+void sbb_of_byte(struct emuctx *ctx, byte val1, byte val2) ;
 
 byte second_op(struct emuctx *ctx) ;
 byte get_regRM(struct emuctx *ctx) ;

@@ -344,4 +344,52 @@ void test_emu()
     if (get_cf(&ctx) != YES) fail("sub cl, 0xff - CF flag") ;
     if (get_af(&ctx) != YES) fail("sub cl, 0xff - AF flag") ;
     emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes31[] = { 0x81, 0xC2, 0xF0, 0xF0} ; // add dx,0xf0f0
+    emu_write_bytes(&ctx, opcodes31, 4) ;
+    ctx.dx.w = 0x4652 ;
+    emu_step(&ctx) ;
+    if (ctx.dx.w != 0x3742) fail("add dx,0xf0f0 - wrong result") ;
+    if (get_pf(&ctx) != YES) fail("add dx,0xf0f0 - PF Flag") ;
+    if (get_zf(&ctx) != NO) fail("add dx,0xf0f0 - ZF Flag") ;
+    if (get_af(&ctx) != NO) fail("add dx,0xf0f0 - AF Flag") ;
+    if (get_cf(&ctx) != YES) fail("add dx,0xf0f0 - CF Flag") ;
+    if (get_sf(&ctx) != NO) fail("add dx,0xf0f0 - SF Flag") ;
+    if (get_of(&ctx) != NO) fail("add dx,0xf0f0 - OF Flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes32[] = { 0x81, 0x09, 0x05, 0x08} ; // or word [bx+di],0x805
+    ctx.ds.w = 0x3800 ;
+    ctx.bx.w = 0x0200 ;
+    ctx.di.w = 0x0136 ;
+    value.w = 0x06B3;
+    write_mem_word(&ctx, 0x38336, value) ;
+    emu_write_bytes(&ctx, opcodes32, 4) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, 0x38336) ;
+    if (result.w != 0x0EB7) fail("or word [bx+di],0x805 - wrong result") ;
+    if (get_pf(&ctx) != YES) fail("or word [bx+di],0x805 - PF flag") ;
+    if (get_cf(&ctx) != NO) fail("or word [bx+di],0x805 - CF flag") ;
+    if (get_sf(&ctx) != NO) fail("or word [bx+di],0x805 - SF flag") ;
+    if (get_of(&ctx) != NO) fail("or word [bx+di],0x805 - OF flag") ;
+    if (get_zf(&ctx) != NO) fail("or word [bx+di],0x805 - ZF flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes33[] = { 0x81, 0x14, 0x31, 0x2D} ; // adc word [si],0x2d31
+    emu_write_bytes(&ctx, opcodes33, 4) ;
+    ctx.ds.w = 0xE400 ;
+    ctx.si.w = 0x0040 ;
+    value.w = 0x6B90;
+    set_cf(&ctx, NO) ;
+    write_mem_word(&ctx, 0xE4040, value) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, 0xE4040) ;
+    if (result.w != 0x98C1) fail("adc word [si],0x2d31 - wrong result") ;
+    if (get_pf(&ctx) != NO) fail("adc word [si],0x2d31 - PF flag") ;
+    if (get_cf(&ctx) != NO) fail("adc word [si],0x2d31 - CF flag") ;
+    if (get_sf(&ctx) != YES) fail("adc word [si],0x2d31 - SF flag") ;
+    if (get_of(&ctx) != YES) fail("adc word [si],0x2d31 - OF flag") ;
+    if (get_zf(&ctx) != NO) fail("adc word [si],0x2d31 - ZF flag") ;
+    if (get_af(&ctx) != NO) fail("adc word [si],0x2d31 - AF flag") ;
+    emu_cleanup(&ctx) ;
 }
