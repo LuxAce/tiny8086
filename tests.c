@@ -392,4 +392,63 @@ void test_emu()
     if (get_zf(&ctx) != NO) fail("adc word [si],0x2d31 - ZF flag") ;
     if (get_af(&ctx) != NO) fail("adc word [si],0x2d31 - AF flag") ;
     emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes34[] = { 0x81, 0x27, 0x52, 0x00} ; // and word [bx],0x52
+    emu_write_bytes(&ctx, opcodes34, 4) ;
+    ctx.ds.w = 0x0 ;
+    ctx.bx.w = 0x0104 ;
+    value.w = 0x47 ;
+    write_mem_word(&ctx, 0x00104, value) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, 0x00104) ;
+    if (result.w != 0x42) fail("and word [bx],0x52 - wrong result") ;
+    if (get_of(&ctx) != NO) fail("and word [bx],0x52 - OF flag") ;
+    if (get_cf(&ctx) != NO) fail("and word [bx],0x52 - CF flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes35[] = { 0x81, 0x6c, 0x14, 0x36, 0x01} ; // sub word [si+0x14],0x136
+    emu_write_bytes(&ctx, opcodes35, 5) ;
+    ctx.ds.w = 0x3000 ;
+    ctx.si.w = 0x0040 ;
+    value.w = 0x4336 ;
+    write_mem_word(&ctx, 0x30054, value) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, 0x30054) ;
+    if (result.w != 0x4200) fail("sub word [si+0x14],0x136 - wrong result") ;
+    if (get_pf(&ctx) != YES) fail("sub word [si+0x14],0x136 - PF flag") ;
+    if (get_af(&ctx) != NO) fail("sub word [si+0x14],0x136 - AF flag") ;
+    if (get_of(&ctx) != NO) fail("sub word [si+0x14],0x136 - OF flag") ;
+    if (get_sf(&ctx) != NO) fail("sub word [si+0x14],0x136 - SF flag") ;
+    if (get_cf(&ctx) != NO) fail("sub word [si+0x14],0x136 - CF flag") ;
+    if (get_zf(&ctx) != NO) fail("sub word [si+0x14],0x136 - ZF flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes36[] = { 0x81, 0x31, 0x05, 0x08} ; // xor word [bx+di],0x805
+    emu_write_bytes(&ctx, opcodes36, 4) ;
+    ctx.ds.w = 0x3800 ;
+    ctx.bx.w = 0x0200 ;
+    ctx.di.w = 0x0136 ;
+    value.w = 0x06B3 ;
+    write_mem_word(&ctx, 0x38336, value) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, 0x38336) ;
+    if (result.w != 0x0EB6) fail("xor word [bx+di],0x805 - wrong result") ;
+    if (get_pf(&ctx) != NO) fail("xor word [bx+di],0x805 - PF flag") ;
+    if (get_cf(&ctx) != NO) fail("xor word [bx+di],0x805 - CF flag") ;
+    if (get_of(&ctx) != NO) fail("xor word [bx+di],0x805 - OF flag") ;
+    if (get_zf(&ctx) != NO) fail("xor word [bx+di],0x805 - ZF flag") ;
+    if (get_sf(&ctx) != NO) fail("xor word [bx+di],0x805 - SF flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes37[] = { 0x81, 0xfe, 0x00, 0x02} ; // cmp si,0x200
+    emu_write_bytes(&ctx, opcodes37, 4) ;
+    ctx.si.w = 0x01BA ;
+    emu_step(&ctx) ;
+    if (get_pf(&ctx) != NO) fail("cmp si,0x200 - PF flag") ;
+    if (get_af(&ctx) != YES) fail("cmp si,0x200 - AF flag") ;
+    if (get_of(&ctx) != NO) fail("cmp si,0x200 - OF flag") ;
+    if (get_sf(&ctx) != YES) fail("cmp si,0x200 - SF flag") ;
+    if (get_cf(&ctx) != YES) fail("cmp si,0x200 - CF flag") ;
+    if (get_zf(&ctx) != NO) fail("cmp si,0x200 - ZF flag") ;
+    emu_cleanup(&ctx) ;
 }

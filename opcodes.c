@@ -352,10 +352,10 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte result = left_reg + right_reg + get_cf(ctx) ;
                 set_reg8(ctx, addr, result) ;
-                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                 if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
                 else set_af(ctx, NO) ;
+                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
                 is_sign_byte(ctx, result) ;
@@ -367,10 +367,10 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte result = left_reg + right_reg + get_cf(ctx) ;
                 write_mem_byte(ctx, addr, result) ;
-                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                 if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
                 else set_af(ctx, NO) ;
+                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
                 is_sign_byte(ctx, result) ;
@@ -387,11 +387,11 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
                 set_reg16(ctx, addr, result) ;
-                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
                 word_af_adc(ctx, left_reg, right_reg) ;
+                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -404,11 +404,11 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
                 write_mem_word(ctx, addr, result) ;
-                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
                 word_af_adc(ctx, left_reg, right_reg) ;
+                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -424,10 +424,10 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, addr) ;
                 byte result = left_reg + right_reg + get_cf(ctx) ;
                 set_reg8(ctx, addr, result) ;
-                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                 if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
                 else set_af(ctx, NO) ;
+                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
                 is_sign_byte(ctx, result) ;
@@ -439,10 +439,10 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = read_mem_byte(ctx, addr) ;
                 byte result = left_reg + right_reg + get_cf(ctx) ;
                 set_reg8(ctx, get_regRM(ctx), result) ;
-                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                 if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
                 else set_af(ctx, NO) ;
+                set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
                 is_sign_byte(ctx, result) ;
@@ -459,11 +459,11 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
                 set_reg16(ctx, addr, result) ;
-                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
                 word_af_adc(ctx, left_reg, right_reg) ;
+                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -476,11 +476,11 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
                 set_reg16(ctx, get_regRM(ctx), result) ;
-                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 word second_op ;
                 second_op.w = right_reg.w + get_cf(ctx) ;
                 set_of_word(ctx, left_reg, second_op, result) ;
                 word_af_adc(ctx, left_reg, right_reg) ;
+                set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
                 is_sign_word(ctx, result) ;
@@ -493,10 +493,10 @@ void emu_step(struct emuctx *ctx)
             byte right_reg = next_byte(ctx) ;
             byte result = left_reg + right_reg + get_cf(ctx) ;
             set_reg8(ctx, AL, result) ;
-            set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
             set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
             if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
             else set_af(ctx, NO) ;
+            set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
             is_parity_byte(ctx, result) ;
             is_zero_byte(ctx, result) ;
             is_sign_byte(ctx, result) ;
@@ -509,11 +509,11 @@ void emu_step(struct emuctx *ctx)
             word result ;
             result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
             set_reg16(ctx, AX, result) ;
-            set_cf_word(ctx, left_reg.w + (right_reg.w + get_cf(ctx))) ;
             word second_op ;
             second_op.w = right_reg.w + get_cf(ctx) ;
             set_of_word(ctx, left_reg, second_op, result) ;
             word_af_adc(ctx, left_reg, right_reg) ;
+            set_cf_word(ctx, left_reg.w + (right_reg.w + get_cf(ctx))) ;
             is_parity_word(ctx, result) ;
             is_zero_word(ctx, result) ;
             is_sign_word(ctx, result) ;
@@ -848,7 +848,7 @@ void emu_step(struct emuctx *ctx)
                 byte result = left_reg - right_reg ;
                 set_reg8(ctx, addr, result) ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
+                byte_of_sub(ctx, left_reg, right_reg)  ;
                 byte_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -862,7 +862,7 @@ void emu_step(struct emuctx *ctx)
                 byte result = left_reg - right_reg ;
                 write_mem_byte(ctx, addr, result) ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
+                byte_of_sub(ctx, left_reg, right_reg)  ;
                 byte_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -881,7 +881,7 @@ void emu_step(struct emuctx *ctx)
                 result.w = left_reg.w - right_reg.w;
                 set_reg16(ctx, addr, result) ;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -896,7 +896,7 @@ void emu_step(struct emuctx *ctx)
                 result.w = left_reg.w - right_reg.w;
                 write_mem_word(ctx, addr, result) ;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -915,7 +915,7 @@ void emu_step(struct emuctx *ctx)
                 byte result = left_reg - right_reg;
                 set_reg8(ctx, addr, result) ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
+                byte_of_sub(ctx, left_reg, right_reg) ;
                 byte_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -928,8 +928,8 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = read_mem_byte(ctx, addr) ;
                 byte result = left_reg - right_reg;
                 set_reg8(ctx, get_regRM(ctx), result) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
+                byte_of_sub(ctx, left_reg, right_reg) ;
                 byte_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -948,7 +948,7 @@ void emu_step(struct emuctx *ctx)
                 result.w = left_reg.w - right_reg.w;
                 set_reg16(ctx, addr, result) ;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -963,7 +963,7 @@ void emu_step(struct emuctx *ctx)
                 result.w = left_reg.w - right_reg.w;
                 set_reg16(ctx, get_regRM(ctx), result) ;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ;
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -977,9 +977,9 @@ void emu_step(struct emuctx *ctx)
             byte right_reg = next_byte(ctx) ;
             byte result = left_reg - right_reg ;
             set_reg8(ctx, AL, result) ;
-            set_of_byte(ctx, left_reg, right_reg, result)  ;
             byte_cf_sub(ctx, left_reg, right_reg) ;
-            byte_af_sub(ctx, left_reg, right_reg) ; 
+            byte_af_sub(ctx, left_reg, right_reg) ;
+            byte_of_sub(ctx, left_reg, right_reg) ;
             is_parity_byte(ctx, result) ;
             is_zero_byte(ctx, result) ;
             is_sign_byte(ctx, result) ;
@@ -993,7 +993,7 @@ void emu_step(struct emuctx *ctx)
             result.w = left_reg.w - right_reg.w;
             set_reg16(ctx, AX, result) ;
             word_cf_sub(ctx, left_reg, right_reg) ;
-            set_of_word(ctx, left_reg, right_reg, result) ;
+            word_of_sub(ctx, left_reg, right_reg) ;
             word_af_sub(ctx, left_reg, right_reg) ;
             is_parity_word(ctx, result) ;
             is_zero_word(ctx, result) ;
@@ -1188,7 +1188,7 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte result = left_reg - right_reg ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
+                byte_of_sub(ctx, left_reg, right_reg)  ;
                 byte_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -1201,7 +1201,7 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte result = left_reg - right_reg ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
+                byte_of_sub(ctx, left_reg, right_reg) ;
                 byte_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -1219,7 +1219,7 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - right_reg.w;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -1233,7 +1233,7 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - right_reg.w;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -1250,7 +1250,7 @@ void emu_step(struct emuctx *ctx)
                 byte right_reg = get_reg8(ctx, addr) ;
                 byte result = left_reg - right_reg;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
+                byte_of_sub(ctx, left_reg, right_reg) ;
                 byte_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -1262,8 +1262,8 @@ void emu_step(struct emuctx *ctx)
                 byte left_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte right_reg = read_mem_byte(ctx, addr) ;
                 byte result = left_reg - right_reg;
-                set_of_byte(ctx, left_reg, right_reg, result)  ;
                 byte_cf_sub(ctx, left_reg, right_reg) ;
+                byte_of_sub(ctx, left_reg, right_reg) ;
                 byte_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_byte(ctx, result) ;
                 is_zero_byte(ctx, result) ;
@@ -1281,7 +1281,7 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - right_reg.w;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -1295,7 +1295,7 @@ void emu_step(struct emuctx *ctx)
                 word result ;
                 result.w = left_reg.w - right_reg.w;
                 word_cf_sub(ctx, left_reg, right_reg) ;
-                set_of_word(ctx, left_reg, right_reg, result) ;
+                word_of_sub(ctx, left_reg, right_reg) ;
                 word_af_sub(ctx, left_reg, right_reg) ; 
                 is_parity_word(ctx, result) ;
                 is_zero_word(ctx, result) ;
@@ -1308,8 +1308,8 @@ void emu_step(struct emuctx *ctx)
             byte left_reg = get_reg8(ctx, AL) ;
             byte right_reg = next_byte(ctx) ;
             byte result = left_reg - right_reg ;
-            set_of_byte(ctx, left_reg, right_reg, result)  ;
             byte_cf_sub(ctx, left_reg, right_reg) ;
+            byte_of_sub(ctx, left_reg, right_reg) ;
             byte_af_sub(ctx, left_reg, right_reg) ; 
             is_parity_byte(ctx, result) ;
             is_zero_byte(ctx, result) ;
@@ -1323,7 +1323,7 @@ void emu_step(struct emuctx *ctx)
             word result ;
             result.w = left_reg.w - right_reg.w;
             word_cf_sub(ctx, left_reg, right_reg) ;
-            set_of_word(ctx, left_reg, right_reg, result) ;
+            word_of_sub(ctx, left_reg, right_reg) ;
             word_af_sub(ctx, left_reg, right_reg) ; 
             is_parity_word(ctx, result) ;
             is_zero_word(ctx, result) ;
@@ -1837,10 +1837,10 @@ void emu_step(struct emuctx *ctx)
                         byte right_reg = next_byte(ctx) ;
                         byte result = left_reg + right_reg + get_cf(ctx) ;
                         set_reg8(ctx, addr, result) ;
-                        set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                         set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                         if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
                         else set_af(ctx, NO) ;
+                        set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
                         is_sign_byte(ctx, result) ;
@@ -1852,10 +1852,10 @@ void emu_step(struct emuctx *ctx)
                         byte right_reg = next_byte(ctx) ;
                         byte result = left_reg + right_reg + get_cf(ctx) ;
                         write_mem_byte(ctx, addr, result) ;
-                        set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                         set_of_byte(ctx, left_reg, right_reg+get_cf(ctx), result)  ;
                         if (((left_reg & 0x0F) + (right_reg & 0x0F) + get_cf(ctx)) & 0x10) set_af(ctx, YES) ;
                         else set_af(ctx, NO) ;
+                        set_cf_byte(ctx, left_reg+right_reg+get_cf(ctx)) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
                         is_sign_byte(ctx, result) ;
@@ -1930,7 +1930,7 @@ void emu_step(struct emuctx *ctx)
                         byte result = left_reg - right_reg ;
                         set_reg8(ctx, addr, result) ;
                         byte_cf_sub(ctx, left_reg, right_reg) ;
-                        set_of_byte(ctx, left_reg, right_reg, result)  ;
+                        byte_of_sub(ctx, left_reg, right_reg) ;
                         byte_af_sub(ctx, left_reg, right_reg) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
@@ -1944,7 +1944,7 @@ void emu_step(struct emuctx *ctx)
                         byte result = left_reg - right_reg ;
                         write_mem_byte(ctx, addr, result) ;
                         byte_cf_sub(ctx, left_reg, right_reg) ;
-                        set_of_byte(ctx, left_reg, right_reg, result)  ;
+                        byte_of_sub(ctx, left_reg, right_reg) ;
                         byte_af_sub(ctx, left_reg, right_reg) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
@@ -1993,7 +1993,7 @@ void emu_step(struct emuctx *ctx)
                         byte right_reg = next_byte(ctx) ;
                         byte result = left_reg - right_reg ;
                         byte_cf_sub(ctx, left_reg, right_reg) ;
-                        set_of_byte(ctx, left_reg, right_reg, result)  ;
+                        byte_of_sub(ctx, left_reg, right_reg)  ;
                         byte_af_sub(ctx, left_reg, right_reg) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
@@ -2006,7 +2006,7 @@ void emu_step(struct emuctx *ctx)
                         byte right_reg = next_byte(ctx) ;
                         byte result = left_reg - right_reg ;
                         byte_cf_sub(ctx, left_reg, right_reg) ;
-                        set_of_byte(ctx, left_reg, right_reg, result)  ;
+                        byte_of_sub(ctx, left_reg, right_reg)  ;
                         byte_af_sub(ctx, left_reg, right_reg) ;
                         is_parity_byte(ctx, result) ;
                         is_zero_byte(ctx, result) ;
@@ -2102,11 +2102,11 @@ void emu_step(struct emuctx *ctx)
                         word result ;
                         result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
                         set_reg16(ctx, addr, result) ;
-                        set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                         word second_op ;
                         second_op.w = right_reg.w + get_cf(ctx) ;
                         set_of_word(ctx, left_reg, second_op, result) ;
                         word_af_adc(ctx, left_reg, right_reg) ;
+                        set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                         is_parity_word(ctx, result) ;
                         is_zero_word(ctx, result) ;
                         is_sign_word(ctx, result) ;
@@ -2119,11 +2119,11 @@ void emu_step(struct emuctx *ctx)
                         word result ;
                         result.w = left_reg.w + right_reg.w + get_cf(ctx) ;
                         write_mem_word(ctx, addr, result) ;
-                        set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                         word second_op ;
                         second_op.w = right_reg.w + get_cf(ctx) ;
                         set_of_word(ctx, left_reg, second_op, result) ;
-                        word_af_adc(ctx, left_reg, right_reg) ;
+                        word_af_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         (ctx, left_reg, right_reg) ;
+                        set_cf_word(ctx, left_reg.w+right_reg.w+get_cf(ctx)) ;
                         is_parity_word(ctx, result) ;
                         is_zero_word(ctx, result) ;
                         is_sign_word(ctx, result) ;
@@ -2166,6 +2166,134 @@ void emu_step(struct emuctx *ctx)
                         set_cycles(ctx, 17) ;
                     }
 
+                } break ;
+                case 0x04:
+                { // and reg16/mem16,immed16
+                    debug("and reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w & right_reg.w ;
+                        set_reg16(ctx, addr, result) ;
+                        set_cf(ctx, NO) ;
+                        set_of(ctx, NO) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w & right_reg.w ;
+                        write_mem_word(ctx, addr, result) ;
+                        set_cf(ctx, NO) ;
+                        set_of(ctx, NO) ;
+                        set_cycles(ctx, 17) ;
+                    }
+                } break ;
+                case 0x05:
+                { // sub reg16/mem16,immed16
+                    debug("sub reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w - right_reg.w;
+                        set_reg16(ctx, addr, result) ;
+                        word_cf_sub(ctx, left_reg, right_reg) ;
+                        word_of_sub(ctx, left_reg, right_reg) ;
+                        word_af_sub(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w - right_reg.w;
+                        write_mem_word(ctx, addr, result) ;
+                        word_cf_sub(ctx, left_reg, right_reg) ;
+                        word_of_sub(ctx, left_reg, right_reg) ;
+                        word_af_sub(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+                } break ;
+                case 0x06:
+                { // xor reg16/mem16,immed16
+                    debug("xor reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w ^ right_reg.w ;
+                        set_reg16(ctx, addr, result) ;
+                        set_cf(ctx, NO) ;
+                        set_of(ctx, NO) ;
+                        is_parity_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w ^ right_reg.w ;
+                        write_mem_word(ctx, addr, result) ;
+                        set_cf(ctx, NO) ;
+                        set_of(ctx, NO) ;
+                        is_parity_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+                } break ;
+                case 0x07:
+                { // cmp reg16/mem16,immed16
+                    debug("cmp reg16/mem16,immed16") ;
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w - right_reg.w;
+                        word_cf_sub(ctx, left_reg, right_reg) ;
+                        word_of_sub(ctx, left_reg, right_reg) ;
+                        word_af_sub(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 4) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        word right_reg = next_word(ctx) ;
+                        word result ;
+                        result.w = left_reg.w - right_reg.w;
+                        word_cf_sub(ctx, left_reg, right_reg) ;
+                        word_of_sub(ctx, left_reg, right_reg) ;
+                        word_af_sub(ctx, left_reg, right_reg) ;
+                        is_parity_word(ctx, result) ;
+                        is_zero_word(ctx, result) ;
+                        is_sign_word(ctx, result) ;
+                        set_cycles(ctx, 10) ;
+                    }
                 } break ;
             }
         } break ;

@@ -100,6 +100,8 @@ void byte_af_sub(struct emuctx *ctx, byte val1, byte val2) ;
 void word_af_sub(struct emuctx *ctx, word val1, word val2) ;
 void word_cf_sub(struct emuctx *ctx, word val1, word val2) ;
 void byte_cf_sub(struct emuctx *ctx, byte val1, byte val2) ;
+void word_of_sub(struct emuctx *ctx, word val1, word val2) ;
+void byte_of_sub(struct emuctx *ctx, byte val1, byte val2) ; 
 
 void inc_flags(struct emuctx *ctx, word value) ; 
 void dec_flags(struct emuctx *ctx, word value) ;

@@ -65,7 +65,7 @@ void word_cf_sub(struct emuctx *ctx, word val1, word val2)
     word two_comp ;
     two_comp.w = (~val2.w) + 1 ;
     unsigned int result = val1.w + two_comp.w ;
-    if (result & 0x100) set_cf(ctx, NO) ;
+    if (result & 0x10000) set_cf(ctx, NO) ;
     else set_cf(ctx, YES) ; 
 }
 
@@ -167,6 +167,26 @@ void sbb_of_word(struct emuctx *ctx, word val1, word val2)
         else if (signed_word(val1) && signed_word(two_comp) && !signed_word(result)) set_of(ctx,YES) ;
         else set_of(ctx, NO) ;
     }
+}
+
+void word_of_sub(struct emuctx *ctx, word val1, word val2)
+{
+    word two_comp ;
+    two_comp.w = (~val2.w) + 1 ;
+    word result ;
+    result.w = val1.w + two_comp.w;
+    if (!signed_word(val1) && !signed_word(two_comp) && signed_word(result)) set_of(ctx, YES) ;
+    else if (signed_word(val1) && signed_word(two_comp) && !signed_word(result)) set_of(ctx,YES) ;
+    else set_of(ctx, NO) ;
+}
+
+void byte_of_sub(struct emuctx *ctx, byte val1, byte val2)
+{
+    byte two_comp = (~val2)+1 ;
+    byte result = val1 + two_comp;
+    if (!signed_byte(val1) && !signed_byte(two_comp) && signed_byte(result)) set_of(ctx, YES) ;
+    else if (signed_byte(val1) && signed_byte(two_comp) && !signed_byte(result)) set_of(ctx, YES) ;
+    else set_of(ctx, NO) ;
 }
 
 void sbb_of_byte(struct emuctx *ctx, byte val1, byte val2)
