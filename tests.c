@@ -451,4 +451,49 @@ void test_emu()
     if (get_cf(&ctx) != YES) fail("cmp si,0x200 - CF flag") ;
     if (get_zf(&ctx) != NO) fail("cmp si,0x200 - ZF flag") ;
     emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes38[] = { 0x83, 0xc3, 0xff} ; // add bx, byte -0x01
+    emu_write_bytes(&ctx, opcodes38, 3) ;
+    ctx.bx.w = 0xFFFF ;
+    emu_step(&ctx) ;
+    if (ctx.bx.w != 0xFFFE) fail("add bx, byte -0x01 - wrong result") ;
+    if (get_cf(&ctx) != YES) fail("add bx, byte -0x01 - CF flag") ;
+    if (get_af(&ctx) != YES) fail("add bx, byte -0x01 - AF flag") ;
+    if (get_zf(&ctx) != NO) fail("add bx, byte -0x01 - ZF flag") ;
+    if (get_sf(&ctx) != YES) fail("add bx, byte -0x01 - SF flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes39[] = { 0x83, 0x07, 0xff} ; // add word [bx], byte -0x01
+    emu_write_bytes(&ctx, opcodes39, 3) ;
+    ctx.ds.w = 0x072A ;
+    ctx.bx.w = 0xFFFE ;
+    value.w = 0xFFFF ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w, value) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w ) ;
+    if (result.w != 0xFFFE) fail("add word [bx], byte -0x01 - wrong result") ;
+    if (get_cf(&ctx) != YES) fail("add word [bx], byte -0x01 - CF flag") ;
+    if (get_af(&ctx) != YES) fail("add word [bx], byte -0x01 - AF flag") ;
+    if (get_zf(&ctx) != NO) fail("add word [bx], byte -0x01 - ZF flag") ;
+    if (get_sf(&ctx) != YES) fail("add word [bx], byte -0x01 - SF flag") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes40[] = { 0x83, 0xd0, 0xff} ; // adc ax, byte -0x01
+    ctx.ax.w = 0x0 ;
+    emu_write_bytes(&ctx, opcodes40, 3) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xFFFF) fail("adc ax, byte -0x01 - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes41[] = { 0x83, 0x10, 0x01} ; // adc word [bx+si], byte 0x1
+    emu_write_bytes(&ctx, opcodes41, 3) ;
+    ctx.bx.w = 0x100 ;
+    ctx.si.w = 0x100 ;
+    ctx.ds.w = 0x072A ;
+    value.w = 0x0 ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w, value) ;
+    emu_step(&ctx) ;
+    result = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w) ;
+    if (result.w != 0x1) fail("adc word [bx+si], byte 0x1 - wrong result") ;
+    emu_cleanup(&ctx) ;
 }
