@@ -47,26 +47,40 @@ void emu_cleanup(struct emuctx *ctx)
 
 void byte_af_sub(struct emuctx *ctx, byte val1, byte val2)
 {
+    /*
     byte two_comp = (~val2)+1 ;
     if (((val1 & 0x0F) + (two_comp & 0x0F)) & 0x10) set_af(ctx, NO);
     else set_af(ctx, YES) ;
+    */
+    if (((val1 & 0x0F) - (val2 & 0x0F)) & 0x10) set_af(ctx, YES);
+    else set_af(ctx, NO) ;
 }
 
 void byte_cf_sub(struct emuctx *ctx, byte val1, byte val2)
 {
+    /*
     byte two_comp = (~val2)+1 ;
     unsigned int result = val1 + two_comp ;
     if (result & 0x100) set_cf(ctx, NO) ;
     else set_cf(ctx, YES) ;
+    */
+    unsigned int result = val1 - val2 ;
+    if (result & 0x100) set_cf(ctx, YES) ;
+    else set_cf(ctx, NO) ;
 }
 
 void word_cf_sub(struct emuctx *ctx, word val1, word val2)
 {
+    /*
     word two_comp ;
     two_comp.w = (~val2.w) + 1 ;
     unsigned int result = val1.w + two_comp.w ;
     if (result & 0x10000) set_cf(ctx, NO) ;
     else set_cf(ctx, YES) ; 
+     */
+    unsigned int result = val1.w - val2.w ;
+    if (result & 0x10000) set_cf(ctx, YES) ;
+    else set_cf(ctx, NO) ;
 }
 
 void word_af_adc(struct emuctx *ctx, word left_reg, word right_reg)
@@ -77,14 +91,14 @@ void word_af_adc(struct emuctx *ctx, word left_reg, word right_reg)
 
 void word_af_sub(struct emuctx *ctx, word val1, word val2)
 {
-    word two_comp ;
-    two_comp.w = (~val2.w) + 1 ;
-    if (((val1.w & 0x0F) + (two_comp.w & 0x0F)) & 0x10) set_af(ctx, NO) ;
-    else set_af(ctx, YES) ;
+    byte result = ((val1.w & 0xF) - (val2.w & 0xF));
+    if (result & 0x10 ) set_af(ctx, YES) ;
+    else { set_af(ctx, NO) ;}
 }
 
 void sbb_af_word(struct emuctx *ctx, word val1, word val2)
 {
+    /*
     word two_comp ;
     two_comp.w = (~val2.w) + 1 ;
     if (get_cf(ctx))
@@ -97,10 +111,23 @@ void sbb_af_word(struct emuctx *ctx, word val1, word val2)
         if (((val1.w & 0x0F) + (two_comp.w & 0x0F)) & 0x10) set_af(ctx, NO) ;
         else set_af(ctx, YES) ;
     }
+    */
+    if (get_cf(ctx))
+    {
+        if (((val1.w & 0x0F) - (val2.w & 0x0F) - 1) & 0x10) set_af(ctx, YES) ;
+        else set_af(ctx, NO) ;
+    }
+    else
+    {
+        if (((val1.w & 0x0F) - (val2.w & 0x0F)) & 0x10) set_af(ctx, YES) ;
+        else set_af(ctx, NO) ;
+    }
+
 }
 
 void sbb_af_byte(struct emuctx *ctx, byte val1, byte val2)
 {
+    /*
     byte two_comp = (~val2)+1 ;
     if (get_cf(ctx))
     {
@@ -112,10 +139,23 @@ void sbb_af_byte(struct emuctx *ctx, byte val1, byte val2)
         if (((val1 & 0x0F) + (two_comp & 0x0F)) & 0x10) set_af(ctx, NO);
         else set_af(ctx, YES) ;
     }
+     */
+    if (get_cf(ctx))
+    {
+        if (((val1 & 0x0F) - (val1 & 0x0F) - 1) & 0x10) set_af(ctx, YES);
+        else set_af(ctx, NO) ;
+    }
+    else
+    {
+        if (((val1 & 0x0F) - (val2 & 0x0F)) & 0x10) set_af(ctx, YES);
+        else set_af(ctx, NO) ;
+    }
+
 }
 
 void sbb_cf_byte(struct emuctx *ctx, byte val1, byte val2)
 {
+    /*
     byte two_comp = (~val2)+1 ;
     if (get_cf(ctx))
     {
@@ -127,11 +167,23 @@ void sbb_cf_byte(struct emuctx *ctx, byte val1, byte val2)
         if ((val1 + two_comp) & 0x100) set_cf(ctx, NO) ;
         else set_cf(ctx, YES) ;
     }
+    */
+    if (get_cf(ctx))
+    {
+        if ((val1 - val2 - 1) & 0x100) set_cf(ctx, YES) ;
+        else set_cf(ctx, NO) ;
+    }
+    else
+    {
+        if ((val1 - val2) & 0x100) set_cf(ctx, YES) ;
+        else set_cf(ctx, NO) ;
+    }
 }
 
 
 void sbb_cf_word(struct emuctx *ctx, word val1, word val2)
 {
+    /*
     word two_comp ;
     two_comp.w = (~val2.w) + 1 ;
     if (get_cf(ctx) == YES)
@@ -143,6 +195,17 @@ void sbb_cf_word(struct emuctx *ctx, word val1, word val2)
     {
         if ((val1.w + two_comp.w) & 0x10000) set_cf(ctx, NO) ;
         else set_cf(ctx, YES) ; 
+    }
+    */
+    if (get_cf(ctx) == YES)
+    {
+        if ((val1.w - val2.w - 1) & 0x10000) set_cf(ctx, YES) ;
+        else set_cf(ctx, NO) ;
+    }
+    else
+    {
+        if ((val1.w - val2.w) & 0x10000) set_cf(ctx, YES) ;
+        else set_cf(ctx, NO) ;
     }
 }
 
@@ -186,6 +249,14 @@ void byte_of_sub(struct emuctx *ctx, byte val1, byte val2)
     byte result = val1 + two_comp;
     if (!signed_byte(val1) && !signed_byte(two_comp) && signed_byte(result)) set_of(ctx, YES) ;
     else if (signed_byte(val1) && signed_byte(two_comp) && !signed_byte(result)) set_of(ctx, YES) ;
+    else set_of(ctx, NO) ;
+}
+
+void byte_of_and(struct emuctx *ctx, byte val1, byte val2)
+{
+    byte result = val1 & val2;
+    if (!signed_byte(val1) && !signed_byte(val2) && signed_byte(result)) set_of(ctx, YES) ;
+    else if (signed_byte(val1) && signed_byte(val2) && !signed_byte(result)) set_of(ctx, YES) ;
     else set_of(ctx, NO) ;
 }
 
@@ -778,7 +849,7 @@ void is_parity_byte(struct emuctx *ctx, byte value)
         if (value & v) p++ ;
         v = v << 1 ;
     }
-    if (!(p & 0x1)) set_pf(ctx, YES) ;
+    if ((p & 0x1)) set_pf(ctx, YES) ;
     else set_pf(ctx, NO) ;
 }
 
@@ -804,7 +875,7 @@ void is_parity_word(struct emuctx *ctx, word value)
         if (value.w & v) p++ ;
         v = v << 1 ;
     }
-    if (!(p & 0x1)) set_pf(ctx, YES) ;
+    if ((p & 0x1)) set_pf(ctx, YES) ;
     else set_pf(ctx, NO) ;
 }
 
