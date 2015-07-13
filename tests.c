@@ -654,4 +654,141 @@ void test_emu()
     if (ctx.ax.b.h != 0xf9) fail("xchg ah,[bx+si+0x64] - wrong result") ;
     if (read_mem_byte(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w + 0x100) != 0x78) fail("xchg ah,[bx+si+0x64] - wrong result") ;
     emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    ctx.bx.w = 0xF0FF ;
+    ctx.ax.w = 0xFFF9 ;
+    value.w = 0xF9FF ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w, value) ;
+    char opcodes54[] = { 0x33, 0x07} ; // xor ax, [bx]
+    emu_write_bytes(&ctx, opcodes54, 2) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0x0606) fail("xor ax, [bx] - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes55[] = { 0x87, 0xD3} ; //  xchg dx,bx
+    emu_write_bytes(&ctx, opcodes55, 2) ;
+    ctx.dx.w = 0xf800 ;
+    ctx.bx.w = 0x9999 ;
+    emu_step(&ctx) ;
+    if (ctx.dx.w != 0x9999) fail("xchg dx,bx - wrong result") ;
+    if (ctx.bx.w != 0xf800) fail("xchg dx,bx - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes56[] = { 0x87, 0x04} ; //  xchg ax,[si]
+    emu_write_bytes(&ctx, opcodes56, 2) ;
+    value.w = 0xffff ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + ctx.si.w, value) ;
+    ctx.ax.w = 0x0f0f ;
+    emu_step(&ctx) ;
+    value = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.si.w);
+    if (value.w != 0x0f0f) fail("xchg ax,[si] - wrong result") ;
+    if (ctx.ax.w != 0xffff) fail("xchg ax,[si] - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes57[] = { 0x88, 0xC4} ; //  mov ah,al
+    emu_write_bytes(&ctx, opcodes57, 2) ;
+    ctx.ax.b.l = 0xf9 ;
+    emu_step(&ctx) ;
+    if (ctx.ax.b.h != 0xf9) fail("mov ah,al - wrong result");
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes58[] = { 0x88, 0xA4, 0x00, 0xff} ; //  mov [si+0xff00],ah
+    emu_write_bytes(&ctx, opcodes58, 4) ;
+    ctx.ds.w = 0x700 ;
+    ctx.si.w = 0x100 ;
+    ctx.ax.b.h = 0xff ;
+    emu_step(&ctx) ;
+    value.w = read_mem_byte(&ctx, (ctx.ds.w << 4) + ctx.si.w + 0xff00) ;
+    if (value.w != 0xff) fail("mov [si+0xff00],ah - wrong result");
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes59[] = { 0x89, 0xCA} ; // mov dx,cx
+    emu_write_bytes(&ctx, opcodes59, 2) ;
+    ctx.cx.w = 0xf900 ;
+    emu_step(&ctx) ;
+    if (ctx.dx.w != 0xf900) fail("mov dx,cx - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes60[] = { 0x89, 0x08} ; // mov [bx+si],cx
+    emu_write_bytes(&ctx, opcodes60, 2) ;
+    ctx.bx.w = 0x100 ;
+    ctx.si.w = 0x100 ;
+    ctx.cx.w = 0xf8f7 ;
+    emu_step(&ctx) ;
+    value = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w) ;
+    if (value.w != 0xf8f7) fail("mov [bx+si],cx - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes61[] = { 0x8A, 0x20} ; // mov ah,[bx+si]
+    emu_write_bytes(&ctx, opcodes61, 2) ;
+    ctx.bx.w = 0x100 ;
+    ctx.si.w = 0x100 ;
+    write_mem_byte(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w, 0xf1) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.b.h != 0xf1) fail("mov ah,[bx+si]") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes62[] = { 0x8B, 0x00} ; // mov ax,[bx+si]
+    emu_write_bytes(&ctx, opcodes62, 2) ;
+    ctx.bx.w = 0x100 ;
+    ctx.si.w = 0x100 ;
+    value.w = 0xffff ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w, value) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xffff) fail("mov ax,[bx+si]") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes63[] = { 0x8C, 0xD8} ; // mov ax,ds
+    emu_write_bytes(&ctx, opcodes63, 2) ;
+    ctx.ds.w = 0xffff ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xffff) fail("mov ax,ds") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes64[] = { 0x8C, 0x00} ; // mov [bx+si],es
+    emu_write_bytes(&ctx, opcodes64, 2) ;
+    ctx.bx.w = 0x100 ;
+    ctx.si.w = 0x100 ;
+    ctx.es.w = 0xff00 ;
+    emu_step(&ctx) ;
+    value = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w + ctx.si.w) ;
+    if (value.w != 0xff00) fail("mov [bx+si],es") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes65[] = { 0x8D, 0x07} ; // lea ax,[bx]
+    emu_write_bytes(&ctx, opcodes65, 2) ;
+    ctx.bx.w = 0x100 ;
+    ctx.ds.w = 0xfff ;
+    ctx.ss.w = 0xff ; 
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0x100) fail("lea ax,[bx] - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes66[] = { 0x8E, 0xD8} ; // mov ds,ax
+    emu_write_bytes(&ctx, opcodes66, 2) ;
+    ctx.ax.w = 0xffff ;
+    emu_step(&ctx) ;
+    if (ctx.ds.w != 0xffff) fail("mov ds,ax - wrong result");
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes67[] = { 0x8E, 0x07} ; // mov es,[bx]
+    emu_write_bytes(&ctx, opcodes67, 2) ;
+    value.w = 0xffff ;
+    ctx.bx.w = 0x100 ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w, value) ;
+    emu_step(&ctx) ;
+    if (ctx.es.w != 0xffff) fail("mov es,[bx] - wrong result");
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes68[] = { 0x50, 0x8f, 0x07} ; // push ax, pop word [bx]
+    emu_write_bytes(&ctx, opcodes68, 3) ;
+    ctx.sp.w = 0xfffe ;
+    ctx.bx.w = 0x100 ;
+    ctx.ax.w = 0xf0f0 ;
+    emu_step(&ctx) ;
+    emu_step(&ctx) ;
+    value = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w) ;
+    if (value.w != 0xf0f0) fail("push ax, pop word [bx] - wrong result") ;
+    emu_cleanup(&ctx) ;
+    
 }

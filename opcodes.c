@@ -84,7 +84,7 @@ void emu_step(struct emuctx *ctx)
                 byte left_reg = get_reg8(ctx, get_regRM(ctx)) ;
                 byte right_reg = get_reg8(ctx, addr) ;
                 byte result = left_reg + right_reg ;
-                set_reg8(ctx, get_regRM(ctx), result) ; 
+                set_reg8(ctx, get_regRM(ctx), result) ;
                 set_cf_byte(ctx, left_reg+right_reg) ;
                 set_of_byte(ctx, left_reg, right_reg, result)  ;
                 if (((left_reg & 0x0F) + (right_reg & 0x0F)) & 0x10) set_af(ctx, YES) ;
@@ -2629,6 +2629,270 @@ void emu_step(struct emuctx *ctx)
                 set_reg16(ctx, get_regRM(ctx), right_reg) ;
                 write_mem_word(ctx, addr, temp) ;
                 set_cycles(ctx, 17) ;
+            }
+        } break ;
+        case 0x88:
+        { // mov reg8/mem8,reg8
+            debug("mov reg8/mem8,reg8") ;
+            int addr = decodeEA(ctx) ;
+            if (is_reg(ctx))
+            {
+                byte left_reg = get_reg8(ctx, addr) ;
+                byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
+                set_reg8(ctx, addr, right_reg) ;
+                set_cycles(ctx, 2) ;
+            }
+            else
+            {
+                byte left_reg = read_mem_byte(ctx, addr) ;
+                byte right_reg = get_reg8(ctx, get_regRM(ctx)) ;
+                write_mem_byte(ctx, addr, right_reg) ;
+                set_cycles(ctx, 9) ;
+            }
+        } break ;
+        case 0x89:
+        { // mov reg16/mem16,reg16
+            debug("mov reg16/mem16,reg16") ;
+            int addr = decodeEA(ctx) ;
+            if (is_reg(ctx))
+            {
+                word left_reg = get_reg16(ctx, addr) ;
+                word right_reg = get_reg16(ctx, get_regRM(ctx)) ;
+                set_reg16(ctx, addr, right_reg) ;
+                set_cycles(ctx, 2) ;
+            }
+            else
+            {
+                word left_reg = read_mem_word(ctx, addr) ;
+                word right_reg = get_reg16(ctx, get_regRM(ctx)) ;
+                write_mem_word(ctx, addr, right_reg) ;
+                set_cycles(ctx, 9) ;
+            }
+
+        } break ;
+        case 0x8A:
+        { // mov reg8,reg8/mem8
+            debug("mov reg8,reg8/mem8") ;
+            int addr = decodeEA(ctx) ;
+            if (is_reg(ctx))
+            {
+                byte left_reg = get_reg8(ctx, get_regRM(ctx)) ;
+                byte right_reg = get_reg8(ctx, addr) ;
+                set_reg8(ctx, get_regRM(ctx), right_reg) ;
+                set_cycles(ctx, 2) ;
+            }
+            else
+            {
+                byte left_reg = get_reg8(ctx, get_regRM(ctx)) ;
+                byte right_reg = read_mem_byte(ctx, addr) ;
+                set_reg8(ctx, get_regRM(ctx), right_reg) ;
+                set_cycles(ctx, 9) ;
+            }
+        } break ;
+        case 0x8B:
+        { // mov reg16,reg16/mem16
+            debug("mov reg16,reg16/mem16") ;
+            int addr = decodeEA(ctx) ;
+            if (is_reg(ctx))
+            {
+                word left_reg = get_reg16(ctx, get_regRM(ctx)) ;
+                word right_reg = get_reg16(ctx, addr);
+                set_reg16(ctx, get_regRM(ctx), right_reg) ;
+                set_cycles(ctx, 2) ;
+            }
+            else
+            {
+                word left_reg = get_reg16(ctx, get_regRM(ctx)) ;
+                word right_reg = read_mem_word(ctx, addr) ;
+                set_reg16(ctx, get_regRM(ctx), right_reg) ;
+                set_cycles(ctx, 9) ;
+            }
+        } break ;
+        case 0x8C:
+        { // mov reg16/mem16,segreg
+            debug("mov reg16/mem16,segreg") ;
+            byte op = ((read_byte(ctx) & 0x38) >> 3) ;
+            switch (op)
+            {
+                case ES:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        set_reg16(ctx, addr, ctx->es) ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        write_mem_word(ctx, addr, ctx->es) ;
+                        set_cycles(ctx, 9) ;
+                    }
+                } break ;
+                case CS:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        set_reg16(ctx, addr, ctx->cs) ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        write_mem_word(ctx, addr, ctx->cs) ;
+                        set_cycles(ctx, 9) ;
+                    }
+                } break ;
+                case SS:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        set_reg16(ctx, addr, ctx->ss) ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        write_mem_word(ctx, addr, ctx->ss) ;
+                        set_cycles(ctx, 9) ;
+                    }
+                } break ;
+                case DS:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word left_reg = get_reg16(ctx, addr) ;
+                        set_reg16(ctx, addr, ctx->ds) ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word left_reg = read_mem_word(ctx, addr) ;
+                        write_mem_word(ctx, addr, ctx->ds) ;
+                        set_cycles(ctx, 9) ;
+                    }
+                } break ;
+                default: debug("0x8c mov reg16/mem16,segreg - not valid") ;  break ;
+            }
+            
+        } break ;
+        case 0x8D:
+        { // lea reg16,mem16
+            debug("lea reg16,mem16") ;
+            ctx->is_mem_ea = YES ;
+            int addr = decodeEA(ctx) ;
+            ctx->is_mem_ea = NO ;
+            word new_addr ;
+            new_addr.w = addr ;
+            set_reg16(ctx, get_regRM(ctx), new_addr) ;
+            set_cycles(ctx, 2) ;
+        } break ;
+        case 0x8E:
+        { // mov segreg,reg16/mem16
+            debug("mov segreg,reg16/mem16");
+            byte op = ((read_byte(ctx) & 0x38) >> 3) ;
+            switch (op)
+            {
+                case ES:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word right_reg = get_reg16(ctx, addr) ;
+                        ctx->es = right_reg ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word right_reg = read_mem_word(ctx, addr) ;
+                        ctx->es = right_reg ;
+                        set_cycles(ctx, 8) ;
+                    }
+                } break;
+                case CS:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word right_reg = get_reg16(ctx, addr) ;
+                        ctx->cs = right_reg ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word right_reg = read_mem_word(ctx, addr) ;
+                        ctx->cs = right_reg ;
+                        set_cycles(ctx, 8) ;
+                    }
+                } break;
+                case SS:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word right_reg = get_reg16(ctx, addr) ;
+                        ctx->ss = right_reg ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word right_reg = read_mem_word(ctx, addr) ;
+                        ctx->ss = right_reg ;
+                        set_cycles(ctx, 8) ;
+                    }
+                } break;
+                case DS:
+                {
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word right_reg = get_reg16(ctx, addr) ;
+                        ctx->ds = right_reg ;
+                        set_cycles(ctx, 2) ;
+                    }
+                    else
+                    {
+                        word right_reg = read_mem_word(ctx, addr) ;
+                        ctx->ds = right_reg ;
+                        set_cycles(ctx, 8) ;
+                    }
+                } break;
+                default: debug("0x8E mov segreg,reg16/mem16 - not valid") ;  break ;
+            }
+        } break ;
+        case 0x8F:
+        {
+            byte op = ((read_byte(ctx) & 0x38) >> 3) ;
+            switch (op)
+            {
+                case 0x00:
+                { // pop reg16/mem16
+                    debug("pop reg16/mem16");
+                    int addr = decodeEA(ctx) ;
+                    if (is_reg(ctx))
+                    {
+                        word result = read_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w) ;
+                        ctx->sp.w = ctx->sp.w + 2 ;
+                        set_reg16(ctx, addr, result) ;
+                        set_cycles(ctx, 8) ;
+                    }
+                    else
+                    {
+                        word result = read_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w) ;
+                        ctx->sp.w = ctx->sp.w + 2 ;
+                        write_mem_word(ctx, addr, result) ;
+                        set_cycles(ctx, 17) ;
+                    }
+
+                } break;
+                default:
+                    debug("0x8f 0x01-0x07 - not valid") ;  break ;
             }
         } break ;
     }

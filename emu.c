@@ -509,6 +509,11 @@ int decodeEA(struct emuctx *ctx)
         } break ;
     }
     int sgmt_over_addr = 0 ;
+    if (ctx->is_mem_ea)
+    {
+        ctx->ds.w = 0x0 ;
+        ctx->ss.w = 0x0 ;
+    }
     switch (rm)
     {
         case 0x00:

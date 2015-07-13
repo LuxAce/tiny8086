@@ -45,6 +45,14 @@ enum registers16
     DI = 6
 } ;
 
+enum seg_registers
+{
+    ES = 0,
+    CS = 1,
+    SS = 2,
+    DS = 3
+};
+
 typedef union
 {
     unsigned short w;
@@ -78,6 +86,7 @@ struct emuctx
     BOOL is_seg_ovr ; 
     unsigned char *mem ;
     byte second_op ;
+    BOOL is_mem_ea ;
 };
 
 void emu_init(struct emuctx *ctx) ;
