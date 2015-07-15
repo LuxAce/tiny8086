@@ -820,7 +820,9 @@ void emu_step(struct emuctx *ctx)
         } break ;
         case 0x26:
         { // es segment override
-            
+            debug("es segment override") ;
+            set_seg_reg(ctx, ES) ;
+            set_cycles(ctx, 2) ;
         } break ;
         case 0x27:
         { // daa
@@ -1004,7 +1006,9 @@ void emu_step(struct emuctx *ctx)
         } break ;
         case 0x2E:
         { // cs - segment override
-            
+            debug("cs - segment override");
+            set_seg_reg(ctx, CS) ;
+            set_cycles(ctx, 2) ;
         } break ;
         case 0x2F:
         { // das
@@ -1176,7 +1180,9 @@ void emu_step(struct emuctx *ctx)
         } break ;
         case 0x36:
         { // ss - segment override
-    
+            debug("ss - segment override") ;
+            set_seg_reg(ctx, SS) ;
+            set_cycles(ctx, 2) ;
         } break ;
         case 0x37:
         { // aaa
@@ -1336,7 +1342,9 @@ void emu_step(struct emuctx *ctx)
         } break ;
         case 0x3E:
         { // ds - segment override
-        
+            debug("ds - segment override") ;
+            set_seg_reg(ctx, DS) ;
+            set_cycles(ctx, 2) ;
         } break ;
         case 0x3F:
         { // ass
@@ -2894,6 +2902,212 @@ void emu_step(struct emuctx *ctx)
                 default:
                     debug("0x8f 0x01-0x07 - not valid") ;  break ;
             }
+        } break ;
+        case 0x90:
+        { // nop
+            debug("nop") ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x91:
+        { // xchg ax,cx
+            debug("xchg ax,cx") ;
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, CX)) ;
+            set_reg16(ctx, CX, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x92:
+        { // xchg ax,dx
+            debug("xchg ax,dx") ;
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, DX)) ;
+            set_reg16(ctx, DX, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x93:
+        { // xchg ax,bx
+            debug("xchg ax,bx");
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, BX)) ;
+            set_reg16(ctx, BX, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x94:
+        { // xchg ax,sp
+            debug("xchg ax,sp") ;
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, SP)) ;
+            set_reg16(ctx, SP, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x95:
+        { // xchg ax,bp
+            debug("xchg ax,bp") ;
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, BP)) ;
+            set_reg16(ctx, BP, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x96:
+        { // xchg ax,si
+            debug("xchg ax,si") ;
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, SI)) ;
+            set_reg16(ctx, SI, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x97:
+        { // xchg ax,di
+            debug("xchg ax,di") ;
+            word tmp = get_reg16(ctx, AX) ;
+            set_reg16(ctx, AX, get_reg16(ctx, DI)) ;
+            set_reg16(ctx, DI, tmp) ;
+            set_cycles(ctx, 3) ;
+        } break ;
+        case 0x98:
+        { // cbw
+            debug("cbw");
+            if (get_reg8(ctx, AH) < 0x80) set_reg8(ctx, AH, 0) ;
+            else set_reg8(ctx, AH, 0xff) ;
+            set_cycles(ctx, 2) ;
+        } break ;
+        case 0x99:
+        { // cwd
+            debug("cwd");
+            word tmp ;
+            if (ctx->ax.w < 0x8000) { tmp.w = 0x0 ;set_reg16(ctx, DX, tmp) ; }
+            else { tmp.w = 0xffff ; set_reg16(ctx, DX, tmp) ; }
+            set_cycles(ctx, 5) ;
+        } break ;
+        case 0x9A:
+        { // call far proc
+            debug("call far");
+            word offs = next_word(ctx);
+            word seg = next_word(ctx) ;
+            ctx->sp.w = ctx->sp.w - 2 ;
+            write_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w, ctx->cs) ;
+            ctx->sp.w = ctx->sp.w - 2 ;
+            write_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w, ctx->ip) ;
+            ctx->cs = seg ;
+            ctx->ip = offs ;
+            set_cycles(ctx, 28) ;
+        } break ;
+        case 0x9B:
+        { // wait
+            debug("wait") ;
+            set_cycles(ctx, 4);
+        } break ;
+        case 0x9C:
+        { // pushf
+            debug("pushf") ;
+            ctx->sp.w = ctx->sp.w - 2 ;
+            write_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w, ctx->flags) ;
+            set_cycles(ctx, 10) ;
+        } break ;
+        case 0x9D:
+        { // popf
+            debug("popf") ;
+            ctx->ip = read_mem_word(ctx, (ctx->ss.w << 4) + ctx->flags.w);
+            ctx->sp.w = ctx->sp.w + 2 ;
+            set_cycles(ctx, 8) ;
+        } break ;
+        case 0x9E:
+        { // sahf
+            ctx->flags.w = ctx->flags.w & 0xFF00 ;
+            ctx->flags.w |= get_reg8(ctx, AH) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0x9F:
+        { // lahf
+            byte f = ctx->flags.w & 0x00FF ;
+            set_reg8(ctx, AH, f) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB8:
+        { // mov ax,immed16
+            debug("mov ax,immed16") ;
+            word data = next_word(ctx) ;
+            set_reg16(ctx, AX, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xA0:
+        { // mov al,mem8
+            debug("mov al,mem8") ;
+            word addr = next_word(ctx) ;
+            /*
+            if (enabled_seg(ctx))
+            {
+                switch (get_seg_reg(ctx))
+                {
+                    case ES: result = read_mem_byte(ctx, (ctx->es.w << 4) + addr.w) ; break ;
+                    case CS: result = read_mem_byte(ctx, (ctx->cs.w << 4) + addr.w) ; break ;
+                    case SS: result = read_mem_byte(ctx, (ctx->ss.w << 4) + addr.w) ; break ;
+                    case DS: result = read_mem_byte(ctx, (ctx->ds.w << 4) + addr.w) ; break ;
+                }
+                disable_seg_ovr(ctx) ;
+            }
+            else result = read_mem_byte(ctx, (ctx->ds.w << 4) + addr.w) ; */
+            byte result = read_mem_byte(ctx, (ctx->ds.w << 4) + addr.w) ;
+            set_reg8(ctx, AL, result) ;
+            set_cycles(ctx, 10) ;
+        } break ;
+        case 0xA1:
+        { // mov ax,mem16
+            debug("mov ax,mem16") ;
+            word addr = next_word(ctx) ;
+            word result = read_mem_word(ctx, (ctx->ds.w << 4) + addr.w) ;
+            set_reg16(ctx, AX, result) ;
+            set_cycles(ctx, 10) ;
+        } break ;
+        case 0xA2:
+        { // mov mem8,al
+            debug("mov mem8,al") ;
+            word addr = next_word(ctx) ;
+            byte value = get_reg8(ctx, AL) ;
+            write_mem_byte(ctx, (ctx->ds.w << 4) + addr.w, value) ;
+            set_cycles(ctx, 10) ;
+        } break ;
+        case 0xA3:
+        { // mov mem16,ax
+            debug("mov mem16,ax") ;
+            word addr = next_word(ctx) ;
+            word value = get_reg16(ctx, AX) ;
+            write_mem_word(ctx, (ctx->ds.w << 4) + addr.w, value) ;
+            set_cycles(ctx, 10) ;
+        } break ;
+        case 0xA4:
+        { // movsb
+            debug("movsb") ;
+            movsb(ctx) ;
+            set_cycles(ctx, 18) ;
+        } break ;
+        case 0xA5:
+        { // movsw
+            debug("movsw") ;
+            movsw(ctx) ;
+            set_cycles(ctx, 18) ;
+        } break ;
+        case 0xA6:
+        { // cmpsb
+            debug("cmpsb") ;
+            cmpsb(ctx) ; 
+            set_cycles(ctx, 22) ;
+        } break ;
+        case 0xBA:
+        { // mov dx,immed16
+            debug("mov dx,immed16") ;
+            word data = next_word(ctx) ;
+            set_reg16(ctx, DX, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xCB:
+        { // retf
+            debug("retf") ;
+            ctx->ip = read_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w);
+            ctx->sp.w = ctx->sp.w + 2 ;
+            ctx->cs = read_mem_word(ctx, (ctx->ss.w << 4) + ctx->sp.w);
+            ctx->sp.w = ctx->sp.w + 2 ;
+            set_cycles(ctx, 26) ;
         } break ;
     }
 }

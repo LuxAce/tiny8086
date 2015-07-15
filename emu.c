@@ -11,9 +11,10 @@ void emu_init(struct emuctx *ctx)
     ctx->ds.w = 0x0 ;
     ctx->ss.w = 0x0 ;
     ctx->es.w = 0x0 ;
-    ctx->sp.w = 0xFFF ;
+    ctx->sp.w = 0xFFFE ;
     ctx->flags.w = 0 ;
-    ctx->is_seg_ovr = 0 ; 
+    ctx->is_seg_ovr = 0 ;
+    ctx->seg_ovr_reg = -1 ;
 }
 
 void emu_reset()
@@ -43,6 +44,28 @@ void emu_write_bytes(struct emuctx *ctx, char array[], byte size)
 void emu_cleanup(struct emuctx *ctx)
 {
     free(ctx->mem) ;
+}
+
+void disable_seg_ovr(struct emuctx *ctx)
+{
+    ctx->is_seg_ovr = NO;
+}
+
+int enabled_seg(struct emuctx *ctx)
+{
+    if (ctx->is_seg_ovr == YES) return YES ;
+    else return NO ;
+}
+
+void set_seg_reg(struct emuctx *ctx, int reg)
+{
+    ctx->is_seg_ovr = YES ;
+    ctx->seg_ovr_reg = reg ;
+}
+
+int  get_seg_reg(struct emuctx *ctx)
+{
+    return ctx->seg_ovr_reg ;
 }
 
 void byte_af_sub(struct emuctx *ctx, byte val1, byte val2)
@@ -469,6 +492,99 @@ byte get_reg8(struct emuctx *ctx, byte reg)
     return 0 ; 
 }
 
+void cmpsb(struct emuctx *ctx)
+{
+    byte left_reg = get_addrb_string(ctx) ;
+    byte right_reg = read_mem_byte(ctx, (ctx->es.w << 4) + ctx->di.w) ;
+    byte result = left_reg - right_reg ;
+    byte_cf_sub(ctx, left_reg, right_reg) ;
+    byte_of_sub(ctx, left_reg, right_reg)  ;
+    byte_af_sub(ctx, left_reg, right_reg) ;
+    is_parity_byte(ctx, result) ;
+    is_zero_byte(ctx, result) ;
+    is_sign_byte(ctx, result) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->si.w = ctx->si.w + 1 ;
+        ctx->di.w = ctx->di.w + 1 ;
+    }
+    else
+    {
+        ctx->si.w = ctx->si.w - 1 ;
+        ctx->di.w = ctx->di.w - 1 ;
+    }
+}
+void movsb(struct emuctx *ctx)
+{
+    byte result = get_addrb_string(ctx) ;
+    write_mem_byte(ctx, (ctx->es.w << 4) + ctx->di.w, result) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->si.w = ctx->si.w + 1 ;
+        ctx->di.w = ctx->di.w + 1 ;
+    }
+    else
+    {
+        ctx->si.w = ctx->si.w - 1 ;
+        ctx->di.w = ctx->di.w - 1 ;
+    }
+}
+
+word get_addrw_string(struct emuctx *ctx)
+{
+    word result ;
+    result.w = 0 ;
+    if (enabled_seg(ctx))
+    {
+        
+        switch (get_seg_reg(ctx))
+        {
+            case ES: result = read_mem_word(ctx, (ctx->es.w << 4) + ctx->si.w) ; break ;
+            case CS: result = read_mem_word(ctx, (ctx->cs.w << 4) + ctx->si.w) ; break ;
+            case SS: result = read_mem_word(ctx, (ctx->ss.w << 4) + ctx->si.w) ; break ;
+            case DS: result = read_mem_word(ctx, (ctx->ds.w << 4) + ctx->si.w) ; break ;
+        }
+        disable_seg_ovr(ctx) ;
+    }
+    else result = read_mem_word(ctx, (ctx->ds.w << 4) + ctx->si.w) ;
+    return result ;
+}
+
+byte get_addrb_string(struct emuctx *ctx)
+{
+    byte result = 0 ;
+    if (enabled_seg(ctx))
+    {
+        
+        switch (get_seg_reg(ctx))
+        {
+            case ES: result = read_mem_byte(ctx, (ctx->es.w << 4) + ctx->si.w) ; break ;
+            case CS: result = read_mem_byte(ctx, (ctx->cs.w << 4) + ctx->si.w) ; break ;
+            case SS: result = read_mem_byte(ctx, (ctx->ss.w << 4) + ctx->si.w) ; break ;
+            case DS: result = read_mem_byte(ctx, (ctx->ds.w << 4) + ctx->si.w) ; break ;
+        }
+        disable_seg_ovr(ctx) ;
+    }
+    else result = read_mem_byte(ctx, (ctx->ds.w << 4) + ctx->si.w) ;
+    return result ;
+}
+
+void movsw(struct emuctx *ctx)
+{
+    word result = get_addrw_string(ctx) ;
+    write_mem_word(ctx, (ctx->es.w << 4) + ctx->di.w, result) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->si.w = ctx->si.w + 2 ;
+        ctx->di.w = ctx->di.w + 2 ;
+    }
+    else
+    {
+        ctx->si.w = ctx->si.w - 2 ;
+        ctx->di.w = ctx->di.w - 2 ;
+    }
+}
+
 int decodeEA(struct emuctx *ctx)
 {
     byte second_byte = next_byte(ctx) ;
@@ -514,46 +630,56 @@ int decodeEA(struct emuctx *ctx)
         ctx->ds.w = 0x0 ;
         ctx->ss.w = 0x0 ;
     }
+    if (enabled_seg(ctx) && (!ctx->is_mem_ea))
+    {
+        switch (get_seg_reg(ctx))
+        {
+            case ES: sgmt_over_addr = ctx->es.w ; break ;
+            case CS: sgmt_over_addr = ctx->cs.w ; break ;
+            case SS: sgmt_over_addr = ctx->ss.w ; break ;
+            case DS: sgmt_over_addr = ctx->ds.w ; break ;
+        }
+    }
     switch (rm)
     {
         case 0x00:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->bx.w + ctx->si.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->bx.w + ctx->si.w + disp.w ;
             else addr = (ctx->ds.w << 4) + ctx->bx.w + ctx->si.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 11) ;
             else set_cycles(ctx, 7) ;
         } break ;
         case 0x01:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->bx.w + ctx->di.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->bx.w + ctx->di.w + disp.w ;
             else addr = (ctx->ds.w << 4) + ctx->bx.w + ctx->di.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 12) ;
             else set_cycles(ctx, 8) ;
         } break ;
         case 0x02:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->bp.w + ctx->si.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->bp.w + ctx->si.w + disp.w ;
             else addr = (ctx->ss.w << 4) + ctx->bp.w + ctx->si.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 12) ;
             else set_cycles(ctx, 8) ;
         } break ;
         case 0x03:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->bp.w + ctx->di.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->bp.w + ctx->di.w + disp.w ;
             else addr = (ctx->ss.w << 4) + ctx->bp.w + ctx->di.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 11) ;
             else set_cycles(ctx, 7) ;
         } break ;
         case 0x04:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->si.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->si.w + disp.w ;
             else addr = (ctx->ds.w << 4) + ctx->si.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 9) ;
             else set_cycles(ctx, 5) ;
         } break ;
         case 0x05:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->di.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->di.w + disp.w ;
             else addr = (ctx->ds.w << 4) + ctx->di.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 9) ;
             else set_cycles(ctx, 5) ;
@@ -567,7 +693,7 @@ int decodeEA(struct emuctx *ctx)
             }
             else
             {
-                if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->bp.w + disp.w ;
+                if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->bp.w + disp.w ;
                 else addr = (ctx->ss.w << 4) + ctx->bp.w + disp.w ;
                 if (is_disp == YES) set_cycles(ctx, 9) ;
                 else set_cycles(ctx, 5) ;
@@ -575,12 +701,13 @@ int decodeEA(struct emuctx *ctx)
         } break ;
         case 0x07:
         {
-            if (ctx->is_seg_ovr) addr = sgmt_over_addr + ctx->bx.w + disp.w ;
+            if (enabled_seg(ctx)) addr = sgmt_over_addr + ctx->bx.w + disp.w ;
             else addr = (ctx->ds.w << 4) + ctx->bx.w + disp.w ;
             if (is_disp == YES) set_cycles(ctx, 9) ;
             else set_cycles(ctx, 5) ;
         } break ;
     }
+    if (enabled_seg(ctx)) disable_seg_ovr(ctx) ;
     return addr ;
 }
 
@@ -686,6 +813,19 @@ void set_cf(struct emuctx *ctx, bool value)
     if (value) ctx->flags.w |= (1 << CF) ;
     else ctx->flags.w &= ~(1 << CF) ;
 }
+
+void set_df(struct emuctx *ctx, bool value)
+{
+    if (value) ctx->flags.w |= (1 << DF) ;
+    else ctx->flags.w &= ~(1 << DF) ;
+}
+
+bool get_df(struct emuctx *ctx)
+{
+    word flags = ctx->flags ;
+    return (flags.w & (1 << DF)) ? YES : NO ;
+}
+
 
 void set_cf_byte(struct emuctx *ctx, int result)
 {

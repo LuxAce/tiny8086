@@ -4,7 +4,7 @@ void fail(char *msg)
 {
     printf("FAIL: %s\n", msg) ;
 }
-
+void test_emu2(struct emuctx ctx) ;
 void test_emu()
 {
     struct emuctx ctx ;
@@ -790,5 +790,173 @@ void test_emu()
     value = read_mem_word(&ctx, (ctx.ds.w << 4) + ctx.bx.w) ;
     if (value.w != 0xf0f0) fail("push ax, pop word [bx] - wrong result") ;
     emu_cleanup(&ctx) ;
-    
+    emu_init(&ctx);
+    char opcodes69[] = { 0x91} ; // xchg ax, cx
+    emu_write_bytes(&ctx, opcodes69, 1) ;
+    ctx.ax.w = 0xf9f9 ;
+    ctx.cx.w = 0xffff ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xffff) fail("xchg ax, cx - wrong result") ;
+    if (ctx.cx.w != 0xf9f9) fail("xchg ax, cx - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes70[] = {0x98} ; // cbw
+    emu_write_bytes(&ctx, opcodes70, 1) ;
+    ctx.ax.b.l = 0xfe ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xfffe) fail("cbw - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes71[] = {0x99} ; // cwd
+    emu_write_bytes(&ctx, opcodes71, 1) ;
+    ctx.ax.w = 0xfffe;
+    emu_step(&ctx) ;
+    if (ctx.dx.w != 0xffff) fail("cwd - wrong result") ;
+    emu_cleanup(&ctx) ;
+    test_emu2(ctx) ;
+}
+
+void test_emu2(struct emuctx ctx)
+{
+    word value ;
+    value.w = 0 ;
+    word addr ;
+    addr.w = 0 ;
+    emu_init(&ctx);
+    /*
+     mov ax, ffff
+     retf
+     call 072A:0000
+     mov dx, ffff
+     */
+    ctx.cs.w = 0x072A ;
+    char opcodes72[] = {0xb8, 0xff, 0xff, 0xcb, 0x9A, 0x00, 0x00, 0x2A, 0x07, 0xba, 0xff, 0xff} ; // call far test
+    emu_write_bytes(&ctx, opcodes72, 12) ;
+    ctx.ip.w = 0x04 ; // call far
+    emu_step(&ctx) ;
+    emu_step(&ctx) ;
+    emu_step(&ctx) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xffff) fail("call far failed") ;
+    if (ctx.dx.w != 0xffff) fail("call far failed") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes73[] = {0x9c, 0x9d} ; // pushf popf
+    emu_write_bytes(&ctx, opcodes73, 2) ;
+    ctx.flags.w = 0xffff ;
+    emu_step(&ctx) ;
+    emu_step(&ctx) ;
+    if (ctx.flags.w != 0xffff) fail("pushf popf - wrong result");
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes74[] = {0x9e} ; // sahf
+    ctx.ax.b.h = 0x81 ; // sf and cf set
+    emu_write_bytes(&ctx, opcodes74, 1) ;
+    emu_step(&ctx) ;
+    if (get_sf(&ctx) != YES) fail("sahf - wrong result") ;
+    if (get_cf(&ctx) != YES) fail("sahf - wrong result") ;
+    if (get_af(&ctx) != NO) fail("sahf - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes75[] = {0x9f} ; // lahf
+    set_cf(&ctx, YES) ;
+    set_sf(&ctx, YES) ;
+    emu_write_bytes(&ctx, opcodes75, 1) ;
+    emu_step(&ctx) ;
+    if (!(ctx.ax.b.h & 0x01)) fail("lahf - wrong result") ;
+    if (!(ctx.ax.b.h & 0x80)) fail("lahf - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes76[] = {0xA0, 0x00, 0x01} ; // mov al, [0x100]
+    emu_write_bytes(&ctx, opcodes76, 3) ;
+    write_mem_byte(&ctx, (ctx.ds.w << 4) + 0x100, 0xf9) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.b.l != 0xf9) fail("mov al, [0x100] - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes77[] = {0xA1, 0xff, 0xff} ; // mov ax,[0xffff]
+    emu_write_bytes(&ctx, opcodes77, 3) ;
+    value.w = 0xf8f7 ;
+    write_mem_word(&ctx, (ctx.ds.w << 4) + 0xffff, value) ;
+    emu_step(&ctx) ;
+    if (ctx.ax.w != 0xf8f7) fail("mov ax,[0xffff] - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes78[] = {0xA2, 0xff, 0xff} ; // mov [0xffff], al
+    emu_write_bytes(&ctx, opcodes78, 3) ;
+    ctx.ax.b.l = 0xf7 ;
+    emu_step(&ctx) ;
+    value.w = read_mem_byte(&ctx, (ctx.ds.w << 4) + 0xffff) ;
+    if (value.w != 0xf7) fail("mov [0xffff], al - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes79[] = {0xA3, 0x00, 0x01} ; // mov [0x100],ax
+    emu_write_bytes(&ctx, opcodes79, 3) ;
+    ctx.ax.w = 0xf8f9 ;
+    emu_step(&ctx) ;
+    addr.w = 0x100 ;
+    value = read_mem_word(&ctx, (ctx.ds.w << 4) + addr.w) ;
+    if (value.w != 0xf8f9) fail("mov [0x100],ax - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes80[] = {0xA4} ; // movsb
+    emu_write_bytes(&ctx, opcodes80, 1) ;
+    ctx.ds.w = 0x600 ;
+    ctx.es.w = 0x700 ;
+    ctx.si.w = 0x0 ;
+    ctx.di.w = 0x0 ;
+    write_mem_byte(&ctx, (ctx.ds.w << 4), 0xf9) ;
+    emu_step(&ctx) ;
+    value.w = read_mem_byte(&ctx, (ctx.es.w << 4)) ;
+    if (value.w != 0xf9) fail("movsb - wrong result") ;
+    if (ctx.si.w != 1) fail("movsb - wrong result") ;
+    if (ctx.di.w != 1) fail("movsb - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes81[] = {0x36, 0xA4} ; // ss movsb
+    emu_write_bytes(&ctx, opcodes81, 2) ;
+    ctx.ss.w = 0x600 ;
+    ctx.es.w = 0x700 ;
+    ctx.si.w = 0x0 ;
+    ctx.di.w = 0x0 ;
+    write_mem_byte(&ctx, (ctx.ss.w << 4), 0xf1) ;
+    emu_step(&ctx) ;
+    emu_step(&ctx) ;
+    value.w = read_mem_byte(&ctx, (ctx.es.w << 4)) ;
+    if (value.w != 0xf1) fail("cs movsb - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes82[] = {0xA5} ; // movsw
+    emu_write_bytes(&ctx, opcodes82, 1) ;
+    ctx.ds.w = 0x600 ;
+    ctx.es.w = 0x700 ;
+    ctx.si.w = 0x0 ;
+    ctx.di.w = 0x0 ;
+    value.w = 0xf2f2 ;
+    write_mem_word(&ctx, (ctx.ds.w << 4), value) ;
+    emu_step(&ctx) ;
+    value = read_mem_word(&ctx, (ctx.es.w << 4)) ;
+    if (value.w != 0xf2f2) fail("movsw - wrong result") ;
+    if (ctx.si.w != 2) fail("movsw - wrong result") ;
+    if (ctx.di.w != 2) fail("movsw - wrong result") ;
+    emu_cleanup(&ctx) ;
+    emu_init(&ctx);
+    char opcodes83[] = {0xA6} ; // cmpsb
+    emu_write_bytes(&ctx, opcodes83, 1) ;
+    ctx.si.w = 0x100 ;
+    ctx.di.w = 0x200 ;
+    ctx.es.w = 0x0600 ;
+    ctx.ds.w = 0x072A ;
+    write_mem_byte(&ctx, (ctx.ds.w << 4) + ctx.si.w, 0) ;
+    write_mem_byte(&ctx, (ctx.es.w << 4) + ctx.di.w, 1) ;
+    emu_step(&ctx) ;
+    if (get_cf(&ctx) != YES) fail("cmpsb - CF flag") ;
+    if (get_pf(&ctx) != NO) fail("cmpsb - PF flag") ;
+    if (get_af(&ctx) != YES) fail("cmpsb - AF flag") ;
+    if (get_zf(&ctx) != NO) fail("cmpsb - ZF flag") ;
+    if (get_sf(&ctx) != YES) fail("cmpsb - SF flag") ;
+    if (get_of(&ctx) != NO) fail("cmpsb - OF flag") ;
+    if (ctx.si.w != 0x101) fail("cmpsb - wrong result") ;
+    if (ctx.di.w != 0x201) fail("cmpsb - wrong result") ;
+    emu_cleanup(&ctx) ;
 }

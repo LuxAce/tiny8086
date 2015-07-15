@@ -87,6 +87,7 @@ struct emuctx
     unsigned char *mem ;
     byte second_op ;
     BOOL is_mem_ea ;
+    signed char seg_ovr_reg ;
 };
 
 void emu_init(struct emuctx *ctx) ;
@@ -99,7 +100,17 @@ void emu_cleanup(struct emuctx *ctx) ;
 int emu_exec(int cycles) ;
 
 void debug(char *s) ;
-
+int enabled_seg(struct emuctx *ctx);
+void disable_seg_ovr(struct emuctx *ctx) ;
+void set_seg_reg(struct emuctx *ctx, int reg) ;
+int  get_seg_reg(struct emuctx *ctx) ;
+void set_df(struct emuctx *ctx, bool value) ;
+bool get_df(struct emuctx *ctx) ;
+void movsb(struct emuctx *ctx) ;
+void movsw(struct emuctx *ctx) ;
+void cmpsb(struct emuctx *ctx) ;
+word get_addrw_string(struct emuctx *ctx) ;
+byte get_addrb_string(struct emuctx *ctx) ;
 void set_cycles(struct emuctx *ctx, int value) ;
 bool is_reg(struct emuctx *ctx) ;
 bool signed_word(word w) ;
