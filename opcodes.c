@@ -3023,13 +3023,6 @@ void emu_step(struct emuctx *ctx)
             set_reg8(ctx, AH, f) ;
             set_cycles(ctx, 4) ;
         } break ;
-        case 0xB8:
-        { // mov ax,immed16
-            debug("mov ax,immed16") ;
-            word data = next_word(ctx) ;
-            set_reg16(ctx, AX, data) ;
-            set_cycles(ctx, 4) ;
-        } break ;
         case 0xA0:
         { // mov al,mem8
             debug("mov al,mem8") ;
@@ -3090,14 +3083,172 @@ void emu_step(struct emuctx *ctx)
         case 0xA6:
         { // cmpsb
             debug("cmpsb") ;
-            cmpsb(ctx) ; 
+            cmpsb(ctx) ;
             set_cycles(ctx, 22) ;
+        } break ;
+        case 0xA7:
+        { // cmpsw
+            debug("cmpsw") ;
+            cmpsw(ctx) ;
+            set_cycles(ctx, 22) ;
+        } break ;
+        case 0xA8:
+        { // test al,immed8
+            debug("test al,immed8");
+            byte left_reg = get_reg8(ctx, AL) ;
+            byte right_reg = next_byte(ctx) ;
+            byte result = left_reg & right_reg ;
+            set_cf(ctx, NO) ;
+            set_of(ctx, NO) ;
+            is_parity_byte(ctx, result) ;
+            is_zero_byte(ctx, result) ;
+            is_sign_byte(ctx, result) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xA9:
+        { // test ax,immed16
+            debug("test ax,immed16") ;
+            word left_reg = get_reg16(ctx, AX) ;
+            word right_reg = next_word(ctx) ;
+            word result ;
+            result.w = left_reg.w & right_reg.w;
+            set_cf(ctx, NO) ;
+            set_of(ctx, NO) ;
+            is_parity_word(ctx, result) ;
+            is_zero_word(ctx, result) ;
+            is_sign_word(ctx, result) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xAA:
+        { // stosb
+            debug("stosb") ;
+            stosb(ctx) ;
+            set_cycles(ctx, 11) ;
+        } break ;
+        case 0xAB:
+        { // stosw
+            debug("stosw") ;
+            stosw(ctx) ;
+            set_cycles(ctx, 11) ;
+        } break ;
+        case 0xAC:
+        { // lodsb
+            debug("lodsb") ;
+            lodsb(ctx) ;
+            set_cycles(ctx, 12) ;
+        } break ;
+        case 0xAD:
+        { // lodsw
+            debug("lodsw") ;
+            lodsw(ctx) ;
+            set_cycles(ctx, 12) ;
+        } break ;
+        case 0xAE:
+        { // scasb
+            debug("scasb") ;
+            scasb(ctx) ;
+            set_cycles(ctx, 15) ;
+        } break ;
+        case 0xAF:
+        { // scasw
+            debug("scasw") ;
+            scasw(ctx) ;
+            set_cycles(ctx, 15) ;
+        } break ;
+        case 0xB0:
+        { // mov al,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, AL, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB1:
+        { // mov cl,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, CL, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB2:
+        { // mov dl,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, DL, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB3:
+        { // mov bl,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, BL, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB4:
+        { // mov ah,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, AH, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB5:
+        { // mov ch,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, CH, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB6:
+        { // mov dh,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, DH, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB7:
+        { // mov bh,immed8
+            byte value = next_byte(ctx) ;
+            set_reg8(ctx, BH, value) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB8:
+        { // mov ax,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, AX, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xB9:
+        { // mov cx,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, CX, data) ;
+            set_cycles(ctx, 4) ;
         } break ;
         case 0xBA:
         { // mov dx,immed16
-            debug("mov dx,immed16") ;
             word data = next_word(ctx) ;
             set_reg16(ctx, DX, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xBB:
+        { // mov bx,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, BX, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xBC:
+        { // mov sp,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, SP, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xBD:
+        { // mov bp,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, BP, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xBE:
+        { // mov si,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, SI, data) ;
+            set_cycles(ctx, 4) ;
+        } break ;
+        case 0xBF:
+        { // mov di,immed16
+            word data = next_word(ctx) ;
+            set_reg16(ctx, DI, data) ;
             set_cycles(ctx, 4) ;
         } break ;
         case 0xCB:

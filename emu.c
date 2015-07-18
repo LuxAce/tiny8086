@@ -492,6 +492,128 @@ byte get_reg8(struct emuctx *ctx, byte reg)
     return 0 ; 
 }
 
+void stosb(struct emuctx *ctx)
+{
+    byte value = get_reg8(ctx, AL) ;
+    write_mem_byte(ctx, (ctx->es.w << 4) + ctx->di.w, value) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->di.w = ctx->di.w + 1 ;
+    }
+    else
+    {
+        ctx->di.w = ctx->di.w - 1 ;
+    }
+}
+
+void lodsb(struct emuctx *ctx)
+{
+    byte value = get_addrb_string(ctx) ;
+    set_reg8(ctx, AL, value) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->si.w = ctx->si.w + 1 ;
+    }
+    else
+    {
+        ctx->si.w = ctx->si.w - 1 ;
+    }
+}
+
+void lodsw(struct emuctx *ctx)
+{
+    word value = get_addrw_string(ctx) ;
+    set_reg16(ctx, AX, value) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->si.w = ctx->si.w + 2 ;
+    }
+    else
+    {
+        ctx->si.w = ctx->si.w - 2 ;
+    }
+}
+void stosw(struct emuctx *ctx)
+{
+    word value = get_reg16(ctx, AX) ;
+    write_mem_word(ctx, (ctx->es.w << 4) + ctx->di.w, value) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->di.w = ctx->di.w + 2 ;
+    }
+    else
+    {
+        ctx->di.w = ctx->di.w - 2 ;
+    }
+
+}
+
+void cmpsw(struct emuctx *ctx)
+{
+    word left_reg = get_addrw_string(ctx) ;
+    word right_reg = read_mem_word(ctx, (ctx->es.w << 4) + ctx->di.w) ;
+    word result ;
+    result.w = left_reg.w - right_reg.w;
+    word_cf_sub(ctx, left_reg, right_reg) ;
+    word_of_sub(ctx, left_reg, right_reg) ;
+    word_af_sub(ctx, left_reg, right_reg) ;
+    is_parity_word(ctx, result) ;
+    is_zero_word(ctx, result) ;
+    is_sign_word(ctx, result) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->si.w = ctx->si.w + 2 ;
+        ctx->di.w = ctx->di.w + 2 ;
+    }
+    else
+    {
+        ctx->si.w = ctx->si.w - 2 ;
+        ctx->di.w = ctx->di.w - 2 ;
+    }
+}
+
+void scasb(struct emuctx *ctx)
+{
+    byte left_reg = get_reg8(ctx, AL) ;
+    byte right_reg = read_mem_byte(ctx, (ctx->es.w << 4) + ctx->di.w) ;
+    byte result = left_reg - right_reg ;
+    byte_cf_sub(ctx, left_reg, right_reg) ;
+    byte_of_sub(ctx, left_reg, right_reg)  ;
+    byte_af_sub(ctx, left_reg, right_reg) ;
+    is_parity_byte(ctx, result) ;
+    is_zero_byte(ctx, result) ;
+    is_sign_byte(ctx, result) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->di.w = ctx->di.w + 1 ;
+    }
+    else
+    {
+        ctx->di.w = ctx->di.w - 1 ;
+    }
+}
+
+void scasw(struct emuctx *ctx)
+{
+    word left_reg = get_reg16(ctx, AX) ;
+    word right_reg = read_mem_word(ctx, (ctx->es.w << 4) + ctx->di.w) ;
+    word result ;
+    result.w = left_reg.w - right_reg.w;
+    word_cf_sub(ctx, left_reg, right_reg) ;
+    word_of_sub(ctx, left_reg, right_reg) ;
+    word_af_sub(ctx, left_reg, right_reg) ;
+    is_parity_word(ctx, result) ;
+    is_zero_word(ctx, result) ;
+    is_sign_word(ctx, result) ;
+    if (get_df(ctx) == NO)
+    {
+        ctx->di.w = ctx->di.w + 2 ;
+    }
+    else
+    {
+        ctx->di.w = ctx->di.w - 2 ;
+    }
+}
 void cmpsb(struct emuctx *ctx)
 {
     byte left_reg = get_addrb_string(ctx) ;
@@ -536,7 +658,6 @@ word get_addrw_string(struct emuctx *ctx)
     result.w = 0 ;
     if (enabled_seg(ctx))
     {
-        
         switch (get_seg_reg(ctx))
         {
             case ES: result = read_mem_word(ctx, (ctx->es.w << 4) + ctx->si.w) ; break ;
@@ -555,7 +676,6 @@ byte get_addrb_string(struct emuctx *ctx)
     byte result = 0 ;
     if (enabled_seg(ctx))
     {
-        
         switch (get_seg_reg(ctx))
         {
             case ES: result = read_mem_byte(ctx, (ctx->es.w << 4) + ctx->si.w) ; break ;
